@@ -140,11 +140,19 @@
   }
 
   function pay() {
+    mixpanel.track('Pay Init', {
+      'addr': cardInfo.pub,
+      'cardId': cardInfo.id
+    })
     payTo.set(cardInfo.pub)
     page = 'payScan'
   }
 
   function cancelPay() {
+    mixpanel.track('Pay Cancel', {
+      'addr': cardInfo.pub,
+      'cardId': cardInfo.id
+    })
     page = 'cardInfo'
     payTo.set(null)
   }
@@ -174,6 +182,10 @@
         ]
       }
       history.set(hist)
+      mixpanel.track('Pay Finish', {
+        'addr': cardInfo.pub,
+        'cardId': cardInfo.id
+      })
     } catch (err) {
       pending = false
       error = err.code
@@ -182,6 +194,10 @@
   }
 
   async function openCard() {
+    mixpanel.track('Unlock', {
+      'addr': cardInfo.pub,
+      'cardId': cardInfo.id
+    })
     cardInfo.key = decryptKey()
 
     document.getElementsByClassName("cardPic")[0].classList.add('animate__animated')
@@ -197,6 +213,11 @@
   }
 
   function displayQRCode() {
+    mixpanel.track('QRCode', {
+      'addr': cardInfo.pub,
+      'cardId': cardInfo.id
+    })
+
     isQRCode = !isQRCode
     if (isQRCode) {
       setTimeout(function() {
@@ -301,6 +322,14 @@
     navigator.clipboard.writeText(cardInfo.pub)
     document.body.style.backgroundColor = 'green'
     setTimeout(() => {document.body.style.backgroundColor = 'black'},1000)
+  }
+
+  async function openExplorer() {
+    mixpanel.track('Explorer', {
+      'addr': cardInfo.pub,
+      'cardId': cardInfo.id
+    })
+    window.open("https://polygonscan.com/address/"+cardInfo.pub)
   }
 
   onMount(async () => {
@@ -410,7 +439,7 @@
               </div>
               <!-- svelte-ignore a11y-click-events-have-key-events -->
               <!-- svelte-ignore a11y-no-static-element-interactions -->
-              <div class="menuItem" on:click={() => {window.open("https://polygonscan.com/address/"+cardInfo.pub)}}>
+              <div class="menuItem" on:click={openExplorer}>
                 <button class="circleMenu">
                   <i class="las la-external-link-square-alt"></i>
                 </button>
