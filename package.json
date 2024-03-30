@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@walletconnect/core": "^2.11.1",
+    "@walletconnect/utils": "^2.11.3",
     "@walletconnect/web3wallet": "^1.10.1",
     "base-x": "^4.0.0",
     "crypto-js": "^4.2.0",

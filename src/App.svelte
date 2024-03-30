@@ -8,12 +8,15 @@
   import mixpanel from 'mixpanel-browser';
   import { Core } from '@walletconnect/core'
   import { Web3Wallet } from '@walletconnect/web3wallet'
+  import { buildApprovedNamespaces, getSdkError } from '@walletconnect/utils'
 
-  // const core = new Core({
-  //   projectId: '71d4d66b28f7a00fbd864c766c793ae5'
-  // })
+  
 
-  mixpanel.init('949cebe20ce072369654cc8d2ca1524c', {debug: true, track_pageview: true, persistence: 'localStorage'});
+  
+
+  initialize()
+
+  
 
   let provider = new ethers.JsonRpcProvider("https://polygon-rpc.com")
   let cardInfo = {}
@@ -33,7 +36,55 @@
   onRampUrl += '&cryptoCurrencyCode=MATIC'
   onRampUrl += '&walletAddress='
 
-  function blinkError() {1
+  let web3wallet
+
+  async function initialize() {
+    mixpanel.init('949cebe20ce072369654cc8d2ca1524c', {debug: true, track_pageview: true, persistence: 'localStorage'});
+
+    const core = new Core({
+      projectId: '71d4d66b28f7a00fbd864c766c793ae5'
+    })
+
+    web3wallet = await Web3Wallet.init({
+      core,
+      metadata: {
+        name: 'Demo app',
+        description: 'Demo Client as Wallet/Peer',
+        url: 'www.walletconnect.com',
+        icons: []
+      }
+    })
+  }
+
+  async function walletConnect() {
+    let uri = prompt("Wallet Connect Link?","")
+
+    web3wallet.on('session_proposal', async proposal => {
+      console.log(proposal.params)
+      const approvedNamespaces = buildApprovedNamespaces({
+        proposal: proposal.params,
+        supportedNamespaces: {
+          eip155: {
+            chains: ['eip155:137'],
+            methods: ['eth_sendTransaction', 'personal_sign'],
+            events: ['accountsChanged', 'chainChanged'],
+            accounts: [
+              'eip155:137:'+cardInfo.pub.toLowerCase()
+            ]
+          }
+        }
+      })
+      console.log(approvedNamespaces)
+      
+      const session = await web3wallet.approveSession({
+        id: proposal.id,
+        namespaces: approvedNamespaces
+      })
+    })
+    await web3wallet.pair({ uri })
+  }
+
+  function blinkError() {
     document.body.style.backgroundColor = 'red'
     setTimeout(() => {document.body.style.backgroundColor = 'black'},1000)
     setTimeout(() => {error = ''},3500)
@@ -254,6 +305,10 @@
     // get last card info
     let cardInfoRaw = window.location.hash.replace('#','').split(':')
     if (cardInfoRaw.length != 3) {
+      mixpanel.track('Redirect Landing', {
+        'addr': cardInfo.pub,
+        'cardId': cardInfo.id
+      })
       window.location.replace("https://card.tap3.me")
       return
     }
@@ -264,17 +319,6 @@
     }
     cardInfo.pub = await ethers.getAddress('0x'+base64ToHex(cardInfoRaw[0]))
 
-    
-
-    // const web3wallet = await Web3Wallet.init({
-    //   core,
-    //   metadata: {
-    //     name: 'Demo app',
-    //     description: 'Demo Client as Wallet/Peer',
-    //     url: 'www.walletconnect.com',
-    //     icons: []
-    //   }
-    // })
 
     // load balance
 		cardInfo.bal = await provider.getBalance(cardInfo.pub)
@@ -389,6 +433,15 @@
           <div id="menuMain">
             <br />
             {#if cardInfo.key}
+              <!-- svelte-ignore a11y-click-events-have-key-events -->
+              <!-- svelte-ignore a11y-no-static-element-interactions -->
+              <div class="menuItem" on:click={walletConnect}>
+                <button class="circleMenu">
+                  <i class="las la-camera"></i>
+                </button>
+                <br />
+                Camera
+              </div>
               <table id="txHistory" style="width: 100%; padding-top: 1rem;">
                 <thead>
                   <tr>
@@ -446,15 +499,13 @@
                 <br />
                 Explorer
               </div>
-              <!-- <br /><br />
-              <button class="smallButton" on:click={displayQRCode}>QR Code</button>
-              <button class="smallButton" on:click={copyAddress}>Copy</button> -->
-              
-              <!-- <button on:click={openCard}>Open</button> -->
             {/if}
-            <!-- <br/><br/><button on:click={newCard}>New Card</button>
+
+            <!-- SUPER HIDDEN DEV STUFF
+            <br/><br/><button on:click={newCard}>New Card</button>
             <textarea bind:value={csv}></textarea>
-            <textarea bind:value={csv2}></textarea> -->
+            <textarea bind:value={csv2}></textarea> 
+                END HIDDEN DEV STUFF -->
           </div>
         </div>
       </div>
