@@ -6,17 +6,9 @@
   import { get } from 'svelte/store'
   import {payTo, history} from './stores/storage.js'
   import mixpanel from 'mixpanel-browser';
-  import { Core } from '@walletconnect/core'
-  import { Web3Wallet } from '@walletconnect/web3wallet'
-  import { buildApprovedNamespaces, getSdkError } from '@walletconnect/utils'
-
-  
-
-  
+  import WalletConnect from './WalletConnect.svelte'
 
   initialize()
-
-  
 
   let provider = new ethers.JsonRpcProvider("https://polygon-rpc.com")
   let cardInfo = {}
@@ -36,52 +28,12 @@
   onRampUrl += '&cryptoCurrencyCode=MATIC'
   onRampUrl += '&walletAddress='
 
-  let web3wallet
-
   async function initialize() {
     mixpanel.init('949cebe20ce072369654cc8d2ca1524c', {debug: true, track_pageview: true, persistence: 'localStorage'});
-
-    const core = new Core({
-      projectId: '71d4d66b28f7a00fbd864c766c793ae5'
-    })
-
-    web3wallet = await Web3Wallet.init({
-      core,
-      metadata: {
-        name: 'Demo app',
-        description: 'Demo Client as Wallet/Peer',
-        url: 'www.walletconnect.com',
-        icons: []
-      }
-    })
   }
 
   async function walletConnect() {
-    let uri = prompt("Wallet Connect Link?","")
-
-    web3wallet.on('session_proposal', async proposal => {
-      console.log(proposal.params)
-      const approvedNamespaces = buildApprovedNamespaces({
-        proposal: proposal.params,
-        supportedNamespaces: {
-          eip155: {
-            chains: ['eip155:137'],
-            methods: ['eth_sendTransaction', 'personal_sign'],
-            events: ['accountsChanged', 'chainChanged'],
-            accounts: [
-              'eip155:137:'+cardInfo.pub.toLowerCase()
-            ]
-          }
-        }
-      })
-      console.log(approvedNamespaces)
-      
-      const session = await web3wallet.approveSession({
-        id: proposal.id,
-        namespaces: approvedNamespaces
-      })
-    })
-    await web3wallet.pair({ uri })
+    page = 'walletConnect'
   }
 
   function blinkError() {
@@ -549,6 +501,10 @@
 
     {#if page == 'payScan'}
       <h1>Tap payment card</h1>
+    {/if}
+
+    {#if page == 'walletConnect'}
+      <WalletConnect cardInfo={cardInfo}/>
     {/if}
   {/if}
 </main>

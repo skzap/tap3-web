@@ -21,6 +21,7 @@
     "crypto-js": "^4.2.0",
     "ethers": "^6.10.0",
     "ethers-svelte": "^3.2.1",
+    "html5-qrcode": "^2.3.8",
     "mixpanel-browser": "^2.49.0",
     "qrcode": "^1.5.3",
     "svelte-persisted-store": "^0.9.0"
