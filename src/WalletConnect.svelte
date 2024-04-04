@@ -135,11 +135,35 @@
   {#if session}
     {#if newTx}
       <h4>New Transaction</h4>
-      <button on:click={confirmTx}>Confirm</button>
-      <button on:click={cancelTx}>Cancel</button>
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
+      <!-- svelte-ignore a11y-no-static-element-interactions -->
+      <div class="menuItem" on:click={confirmTx}>
+        <button class="circleMenu">
+          <i class="las la-check-circle"></i>
+        </button>
+        <br />
+        Confirm
+      </div>
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
+      <!-- svelte-ignore a11y-no-static-element-interactions -->
+      <div class="menuItem" on:click={cancelTx}>
+        <button class="circleMenu">
+          <i class="las la-times-circle"></i>
+        </button>
+        <br />
+        Cancel
+      </div>
     {:else}
       <h4>Connected to {session.peer.metadata.name}</h4>
-      <button on:click={disconnectSession}>Disconnect</button>
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
+      <!-- svelte-ignore a11y-no-static-element-interactions -->
+      <div class="menuItem" on:click={disconnectSession}>
+        <button class="circleMenu">
+          <i class="las la-plug"></i>
+        </button>
+        <br />
+        Disconnect
+      </div>
     {/if}
   {:else}
     <h4>Scan QR Code</h4>

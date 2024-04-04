@@ -387,7 +387,7 @@
                   <i class="las la-camera"></i>
                 </button>
                 <br />
-                Camera
+                WalletConnect
               </div>
               <table id="txHistory" style="width: 100%; padding-top: 1rem;">
                 <thead>
