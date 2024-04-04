@@ -49,10 +49,12 @@
         namespaces: approvedNamespaces
       })
 
-      console.log(session)
+      console.log('SESSION OPEN', session)
 
       web3wallet.on('session_request', async event => {
         console.log(event)
+        let txInput = event.params.request.params[0]
+        console.log(txInput)
         return
         const response = { id, result: signedMessage, jsonrpc: '2.0' }
 
@@ -60,6 +62,14 @@
       })
     })
     await web3wallet.pair({ uri })
+  }
+
+  async function disconnectSession() {
+    await web3wallet.disconnectSession({
+      topic: session.topic,
+      reason: getSdkError('USER_DISCONNECTED')
+    })
+    session = null
   }
 
   onMount(async () => {
@@ -96,6 +106,7 @@
 <div>
   {#if session}
     <h4>Connected to {session.peer.metadata.name}</h4>
+    <button on:click={disconnectSession}>Disconnect</button>
   {:else}
     <h4>Scan QR Code</h4>
     <div id="reader" style="width:95%"></div>
