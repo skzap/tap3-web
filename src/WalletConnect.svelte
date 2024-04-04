@@ -4,11 +4,14 @@
   import { Core } from '@walletconnect/core'
   import { Web3Wallet } from '@walletconnect/web3wallet'
   import { buildApprovedNamespaces, getSdkError } from '@walletconnect/utils'
+  
   export let cardInfo
+  export let signer
 
   let web3wallet
   let session
   let request
+  let newTx
 
   function onScanSuccess(decodedText, decodedResult) {
     // handle the scanned code as you like, for example:
@@ -50,15 +53,9 @@
       })
 
       console.log('SESSION OPEN', session)
-
-      web3wallet.on('session_request', async event => {
-        console.log(event)
-        let txInput = event.params.request.params[0]
-        console.log(txInput)
-        return
-        const response = { id, result: signedMessage, jsonrpc: '2.0' }
-
-        await web3wallet.respondSessionRequest({ topic, response })
+      web3wallet.on('session_request', async tx => {
+        console.log('SESSION REQUEST', tx)
+        newTx = tx
       })
     })
     await web3wallet.pair({ uri })
@@ -70,6 +67,37 @@
       reason: getSdkError('USER_DISCONNECTED')
     })
     session = null
+  }
+
+  async function confirmTx() {
+    let txInput = newTx.params.request.params[0]
+    const tx = await signer.sendTransaction(txInput)
+    const response = {
+      id: newTx.id,
+      result: tx.hash,
+      jsonrpc: '2.0'
+    }
+    await web3wallet.respondSessionRequest({ 
+      topic: session.topic,
+      response: response
+    })
+    newTx = null
+  }
+
+  async function cancelTx() {
+    const response = {
+      id: newTx.id,
+      jsonrpc: '2.0',
+      error: {
+        code: 5000,
+        message: 'User rejected.'
+      }
+    }
+    await web3wallet.respondSessionRequest({ 
+      topic: session.topic,
+      response: response
+    })
+    newTx = null
   }
 
   onMount(async () => {
@@ -105,8 +133,14 @@
 
 <div>
   {#if session}
-    <h4>Connected to {session.peer.metadata.name}</h4>
-    <button on:click={disconnectSession}>Disconnect</button>
+    {#if newTx}
+      <h4>New Transaction</h4>
+      <button on:click={confirmTx}>Confirm</button>
+      <button on:click={cancelTx}>Cancel</button>
+    {:else}
+      <h4>Connected to {session.peer.metadata.name}</h4>
+      <button on:click={disconnectSession}>Disconnect</button>
+    {/if}
   {:else}
     <h4>Scan QR Code</h4>
     <div id="reader" style="width:95%"></div>

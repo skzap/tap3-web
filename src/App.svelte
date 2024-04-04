@@ -11,6 +11,7 @@
   initialize()
 
   let provider = new ethers.JsonRpcProvider("https://polygon-rpc.com")
+  let signer
   let cardInfo = {}
   let csv = ''
   let csv2 = ''
@@ -139,6 +140,7 @@
       return
     }
     cardInfo.key = decrypted
+    signer = new ethers.Wallet(cardInfo.key, provider)
     return decrypted
   }
 
@@ -162,7 +164,6 @@
 
   async function payFinish() {
     cardInfo.key = decryptKey()
-    const signer = new ethers.Wallet(cardInfo.key, provider)
     pending = true
     try {
       const tx = await signer.sendTransaction({
@@ -348,13 +349,7 @@
   {#if cardInfo.pub}
     {#if page == 'cardInfo'}
 
-      <div id="cardInfo">
-        {#if cardInfo.key}
-          <!-- <button class="smallButton">Services</button> -->
-          <!-- <button class="smallButton">Camera</button>
-          <br /><br /> -->
-        {/if}
-          
+      <div id="cardInfo">        
         {#if isQRCode}
           <canvas id="qrCode"></canvas>
         {:else}
@@ -504,7 +499,7 @@
     {/if}
 
     {#if page == 'walletConnect'}
-      <WalletConnect cardInfo={cardInfo}/>
+      <WalletConnect cardInfo={cardInfo} signer={signer}/>
     {/if}
   {/if}
 </main>
