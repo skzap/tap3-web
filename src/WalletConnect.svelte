@@ -8,14 +8,14 @@
   export let cardInfo
   export let signer
 
+  let qrScanner
   let web3wallet
   let session
-  let request
   let newTx
+  let isPairing = false
 
   function onScanSuccess(decodedText, decodedResult) {
-    // handle the scanned code as you like, for example:
-    console.log(`Code matched = ${decodedText}`, decodedResult);
+    qrScanner.clear()
     pair(decodedText)
   }
 
@@ -26,12 +26,14 @@
   }
 
   function fromLink() {
-    let link = document.getElementById("wcLink").value
-    pair(link)
+    pair(document.getElementById("wcLink").value)
   }
 
   async function pair(uri) {
-    console.log(uri)
+    if (isPairing || session)
+      return
+    console.log('PAIRING', uri)
+    isPairing = true
     web3wallet.on('session_proposal', async proposal => {
       const approvedNamespaces = buildApprovedNamespaces({
         proposal: proposal.params,
@@ -46,17 +48,17 @@
           }
         }
       })
-      
       session = await web3wallet.approveSession({
         id: proposal.id,
         namespaces: approvedNamespaces
       })
-
-      console.log('SESSION OPEN', session)
       web3wallet.on('session_request', async tx => {
         console.log('SESSION REQUEST', tx)
         newTx = tx
       })
+
+      console.log('SESSION OPEN', session)
+      isPairing = false
     })
     await web3wallet.pair({ uri })
   }
@@ -117,7 +119,7 @@
     })
 
     // init qrcode scanner
-    let qrScanner = new Html5QrcodeScanner("reader", {
+    qrScanner = new Html5QrcodeScanner("reader", {
       fps: 10,
       qrbox: {
         width: 300,
@@ -132,44 +134,49 @@
 </script>
 
 <div>
-  {#if session}
-    {#if newTx}
-      <h4>New Transaction</h4>
-      <!-- svelte-ignore a11y-click-events-have-key-events -->
-      <!-- svelte-ignore a11y-no-static-element-interactions -->
-      <div class="menuItem" on:click={confirmTx}>
-        <button class="circleMenu">
-          <i class="las la-check-circle"></i>
-        </button>
-        <br />
-        Confirm
-      </div>
-      <!-- svelte-ignore a11y-click-events-have-key-events -->
-      <!-- svelte-ignore a11y-no-static-element-interactions -->
-      <div class="menuItem" on:click={cancelTx}>
-        <button class="circleMenu">
-          <i class="las la-times-circle"></i>
-        </button>
-        <br />
-        Cancel
-      </div>
-    {:else}
-      <h4>Connected to {session.peer.metadata.name}</h4>
-      <!-- svelte-ignore a11y-click-events-have-key-events -->
-      <!-- svelte-ignore a11y-no-static-element-interactions -->
-      <div class="menuItem" on:click={disconnectSession}>
-        <button class="circleMenu">
-          <i class="las la-plug"></i>
-        </button>
-        <br />
-        Disconnect
-      </div>
-    {/if}
+  {#if isPairing}
+    <h4>WAIT</h4>
   {:else}
-    <h4>Scan QR Code</h4>
-    <div id="reader" style="width:95%"></div>
-    <h4>Or paste link</h4>
-    <input type="text" id="wcLink">
-    <button on:click={fromLink}>OK</button>
+    {#if session}
+      {#if newTx}
+        <h4>New Transaction</h4>
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <!-- svelte-ignore a11y-no-static-element-interactions -->
+        <div class="menuItem" on:click={confirmTx}>
+          <button class="circleMenu">
+            <i class="las la-check-circle"></i>
+          </button>
+          <br />
+          Confirm
+        </div>
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <!-- svelte-ignore a11y-no-static-element-interactions -->
+        <div class="menuItem" on:click={cancelTx}>
+          <button class="circleMenu">
+            <i class="las la-times-circle"></i>
+          </button>
+          <br />
+          Cancel
+        </div>
+      {:else}
+        <h4>Connected to {session.peer.metadata.name}</h4>
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <!-- svelte-ignore a11y-no-static-element-interactions -->
+        <div class="menuItem" on:click={disconnectSession}>
+          <button class="circleMenu">
+            <i class="las la-plug"></i>
+          </button>
+          <br />
+          Disconnect
+        </div>
+      {/if}
+    {:else}
+      <h4>Scan QR Code</h4>
+      <div id="reader" style="width:95%"></div>
+      <h4>Or paste link</h4>
+      <input type="text" id="wcLink">
+      <button on:click={fromLink}>OK</button>
+    {/if}
   {/if}
+  
 </div>
