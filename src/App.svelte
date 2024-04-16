@@ -140,6 +140,7 @@
       return
     }
     cardInfo.key = decrypted
+    // console.log(decrypted)
     signer = new ethers.Wallet(cardInfo.key, provider)
     return decrypted
   }
@@ -448,11 +449,11 @@
               </div>
             {/if}
 
-            <!-- SUPER HIDDEN DEV STUFF
-            <br/><br/><button on:click={newCard}>New Card</button>
-            <textarea bind:value={csv}></textarea>
-            <textarea bind:value={csv2}></textarea> 
-                END HIDDEN DEV STUFF -->
+            <!-- SUPER HIDDEN DEV STUFF -->
+            <!-- <br/><br/><button on:click={newCard}>New Card</button>
+            <textarea bind:value={csv} rows="10" cols="50"></textarea>
+            <textarea bind:value={csv2} rows="10" cols="50"></textarea>  -->
+            <!-- END HIDDEN DEV STUFF -->
           </div>
         </div>
       </div>
