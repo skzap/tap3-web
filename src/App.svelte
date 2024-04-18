@@ -271,8 +271,15 @@
       id: base64_to_base10(cardInfoRaw[2]),
       priv: CryptoJS.enc.Base64.parse(cardInfoRaw[1])
     }
-    cardInfo.pub = await ethers.getAddress('0x'+base64ToHex(cardInfoRaw[0]))
 
+    // load card design
+    let res = await fetch(catalogueUrl + cardInfo.id)
+    res = await res.json()
+    cardInfo.css = res[0].css
+    cardInfo.svg = res[0].svg
+    cardInfo.model = res[0].id_model
+
+    cardInfo.pub = await ethers.getAddress('0x'+base64ToHex(cardInfoRaw[0]))
 
     // load balance
 		cardInfo.bal = await provider.getBalance(cardInfo.pub)
@@ -282,14 +289,7 @@
     mixpanel.track('Card Load', {
       'addr': cardInfo.pub,
       'cardId': cardInfo.id
-    })
-
-    // load card design
-    let res = await fetch(catalogueUrl + cardInfo.id)
-    res = await res.json()
-    cardInfo.css = res[0].css
-    cardInfo.svg = res[0].svg
-    cardInfo.model = res[0].id_model
+    }) 
 
     switch (cardInfo.model) {
       case 4:
