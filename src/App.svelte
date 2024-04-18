@@ -7,6 +7,7 @@
   import {payTo, history} from './stores/storage.js'
   import mixpanel from 'mixpanel-browser';
   import WalletConnect from './WalletConnect.svelte'
+  import Transak from './Transak.svelte'
 
   initialize()
 
@@ -23,11 +24,6 @@
   let isQRCode = false
   let maticPrice = null
   let catalogueUrl = 'https://api.tap3.me/catalogue/'
-  let onRampUrl = 'https://global-stg.transak.com/'
-  onRampUrl += '?apiKey=bfaa7c4c-7768-4de2-8239-cb134a03e764'
-  onRampUrl += '&network=polygon'
-  onRampUrl += '&cryptoCurrencyCode=MATIC'
-  onRampUrl += '&walletAddress='
 
   async function initialize() {
     mixpanel.init('949cebe20ce072369654cc8d2ca1524c', {debug: true, track_pageview: true, persistence: 'localStorage'});
@@ -35,6 +31,10 @@
 
   async function walletConnect() {
     page = 'walletConnect'
+  }
+
+  async function transak() {
+    page = 'transak'
   }
 
   function blinkError() {
@@ -390,6 +390,13 @@
                 <br />
                 WalletConnect
               </div>
+              <!-- <div class="menuItem" on:click={transak}>
+                <button class="circleMenu">
+                  <i class="las la-radiation"></i>
+                </button>
+                <br />
+                Transak
+              </div> -->
               <table id="txHistory" style="width: 100%; padding-top: 1rem;">
                 <thead>
                   <tr>
@@ -501,6 +508,10 @@
 
     {#if page == 'walletConnect'}
       <WalletConnect cardInfo={cardInfo} signer={signer}/>
+    {/if}
+
+    {#if page == 'transak'}
+      <Transak pub={cardInfo.pub} />
     {/if}
   {/if}
 </main>
