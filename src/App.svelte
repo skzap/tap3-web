@@ -23,7 +23,7 @@
   let pending = false
   let isQRCode = false
   let maticPrice = null
-  let catalogueUrl = 'https://api.tap3.me/catalogue/'
+  let apiUrl = 'https://api.tap3.me/'
   let transakProduct = 'Buy'
 
   async function initialize() {
@@ -280,7 +280,7 @@
     }
 
     // load card design
-    let res = await fetch(catalogueUrl + cardInfo.id)
+    let res = await fetch(apiUrl + 'catalogue/' + cardInfo.id)
     res = await res.json()
     cardInfo.css = res[0].css
     cardInfo.svg = res[0].svg
@@ -318,9 +318,9 @@
   }
 
   async function loadPrice() {
-    let res = await fetch("https://api.coinpaprika.com/v1/tickers/matic-polygon")
+    let res = await fetch(apiUrl + 'price/MATIC')
     let json = await res.json()
-    maticPrice = json.quotes.USD.price
+    maticPrice = json.usd
   }
 
   async function copyAddress() {
