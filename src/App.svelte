@@ -337,6 +337,14 @@
     window.open("https://polygonscan.com/address/"+cardInfo.pub)
   }
 
+  async function openPortfolio() {
+    mixpanel.track('Portfolio', {
+      'addr': cardInfo.pub,
+      'cardId': cardInfo.id
+    })
+    window.open("https://debank.com/profile/"+cardInfo.pub)
+  }
+
   onMount(async () => {
     await reloadCard()
     window.addEventListener("hashchange", async function() {
@@ -415,6 +423,16 @@
                 <br />
                 Sell
               </div>
+              <!-- svelte-ignore a11y-click-events-have-key-events -->
+              <!-- svelte-ignore a11y-no-static-element-interactions -->
+              <div class="menuItem" on:click={openPortfolio}>
+                <button class="circleMenu">
+                  <i class="las la-wallet"></i>
+                </button>
+                <br />
+                Portfolio
+              </div>
+
               <table id="txHistory" style="width: 100%; padding-top: 1rem;">
                 <thead>
                   <tr>
