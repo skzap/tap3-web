@@ -24,6 +24,7 @@
   let isQRCode = false
   let maticPrice = null
   let catalogueUrl = 'https://api.tap3.me/catalogue/'
+  let transakProduct = 'Buy'
 
   async function initialize() {
     mixpanel.init('949cebe20ce072369654cc8d2ca1524c', {debug: true, track_pageview: true, persistence: 'localStorage'});
@@ -33,7 +34,13 @@
     page = 'walletConnect'
   }
 
-  async function transak() {
+  async function transakBuy() {
+    transakProduct = 'Buy'
+    page = 'transak'
+  }
+
+  async function transakSell() {
+    transakProduct = 'Sell'
     page = 'transak'
   }
 
@@ -390,13 +397,24 @@
                 <br />
                 WalletConnect
               </div>
-              <!-- <div class="menuItem" on:click={transak}>
+              <!-- svelte-ignore a11y-click-events-have-key-events -->
+              <!-- svelte-ignore a11y-no-static-element-interactions -->
+              <div class="menuItem" on:click={transakBuy}>
                 <button class="circleMenu">
-                  <i class="las la-radiation"></i>
+                  <i class="las la-plus"></i>
                 </button>
                 <br />
-                Transak
-              </div> -->
+                Buy
+              </div>
+              <!-- svelte-ignore a11y-click-events-have-key-events -->
+              <!-- svelte-ignore a11y-no-static-element-interactions -->
+              <div class="menuItem" on:click={transakSell}>
+                <button class="circleMenu">
+                  <i class="las la-minus"></i>
+                </button>
+                <br />
+                Sell
+              </div>
               <table id="txHistory" style="width: 100%; padding-top: 1rem;">
                 <thead>
                   <tr>
@@ -511,7 +529,7 @@
     {/if}
 
     {#if page == 'transak'}
-      <Transak pub={cardInfo.pub} />
+      <Transak pub={cardInfo.pub} buyOrSell={transakProduct} balance={cardInfo.balance} />
     {/if}
   {/if}
 </main>
